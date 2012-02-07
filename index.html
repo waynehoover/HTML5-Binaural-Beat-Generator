@@ -1,0 +1,150 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Binaural Beat Generator</title>
+      <link type="text/css" href="css/Aristo/jquery-ui-1.8.7.custom.css" rel="stylesheet" />  
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="js/Audiolet.min.js"></script>
+    <script type="text/javascript"> 
+    $(function(){
+           
+      //global vars    
+      var audiolet = new Audiolet();
+      var out = audiolet.output;
+      var sine1,sine2,pan1,pan2;
+
+      var SetupBeat = function(leftear,rightear){
+        sine1 = new Sine(audiolet, leftear);
+        sine2 = new Sine(audiolet, rightear);
+        pan1 = new Pan(audiolet, 1);
+        pan2 = new Pan(audiolet, 0);
+        sine1.connect(pan1);
+        sine2.connect(pan2);
+      }
+
+      var PlayBeat = function(beat,frequnecy){
+        beat = parseFloat(beat);
+        frequency = parseFloat(frequency);
+        var beat = beat / 2;
+        var leftear = beat + frequency;
+        var rightear = frequency - beat;
+        stop();
+        SetupBeat(leftear,rightear);
+        start();
+      }
+
+      var start = function(){
+        pan1.connect(out);
+        pan2.connect(out);
+      }
+
+      var stop = function(){
+        pan1.disconnect(out);
+        pan2.disconnect(out);
+      }
+                
+      // Init Sliders
+      $('#BBeat').slider({
+        range: "min",
+        animate: true,
+        min: 1,
+        max: 40
+      }).width(500);
+
+      $('#CFreq').slider({
+        range: "min",
+        animate: true,
+        min: 100,
+        max: 300
+      }).width(500);
+
+
+      //On slide change change the input and the sound
+      $("#BBeat, #CFreq").bind("slide", function(event, ui) {
+        var parid = $(ui.handle).parent().attr("id");
+        $("input[name='"+parid+"']").attr("value",ui.value); 
+        if($(this).attr("id") === "BBeat"){
+          BBeat = ui.value;
+          PlayBeat(BBeat, frequency);
+        }else{
+          frequency = ui.value;
+          PlayBeat(BBeat, frequency);
+        }      
+      });
+
+      //On input change change the slider
+      $("input").change(function(){
+        var newval = $(this).val();
+        var valid = $(this).attr("name")
+        $("#"+valid).slider("value",newval);
+        $("#"+valid).trigger("slide",this);
+      });
+
+      $("#start").click(function(){
+        PlayBeat(BBeat,frequency)
+      })
+      $("#stop").click(function(){
+        stop();
+      })
+
+      //init setup
+      var BBeat = parseFloat($("#beat").val())
+      var frequency = parseFloat($("#freq").val())
+
+      var leftear = (BBeat / 2) + frequency;
+      var rightear = frequency - (BBeat / 2);
+      SetupBeat(leftear,rightear);
+
+      $("#BBeat").slider("value",$("#beat").val());
+      $("#CFreq").slider("value",$("#freq").val());
+
+
+    });
+    </script>
+    <style type="text/css">
+      body{ font: 62.5% Cambria, Georgia, serif; margin: 25px 50px;}
+      h1{margin:0;padding:0;font-size:21px;}
+      p{font-size:12px;margin:0; padding:0;}
+      h2{margin-bottom:20px;}
+      input{float:left;margin-left:7px;}
+      #explain{margin-top:20px;}
+      #CFreq, #BBeat{float:left;margin-top:8px;}
+      #buttons{margin-top:20px;}
+      button:last-child{margin-left:10px;}
+    </style>
+</head>
+<body>
+	<h1>Simple Binaural Beat Generator</h1>
+	<h2>Select your carrier frequency and binaural beat.</h2>
+	
+	<p>Carrier (Hz)</p>
+	<div id="CFreq"></div><input type="text" size="4" name="CFreq" id="freq" value="240">
+	
+	<br style="clear:both;">
+	
+  <p>Binaural Beat (Hz)</p>
+  <div id="BBeat"></div><input type="text" size="4" name="BBeat" id="beat" value="4">
+
+	<br style="clear:both;">
+	
+	<div id="buttons">
+    <button id="start">play</button>
+    <button id="stop">stop</button>
+  </div>
+	
+	<div id="explain">
+    <p>Carrier Frequency: The overall tone</p>
+    <p>Binaural Beat Frequency: The binaural beat frequency to entrain to.</p>
+    <br>
+    <p>Works on FireFox 10 or Chrome Beta Channel</p>
+    <p>If FireFox stops working reload the page.</p>
+    <p>Special thanks to <a href="http://healingbeats.com">HealingBeats.com</a></p>
+  </div>
+		
+
+</body>
+</html>
+
+
